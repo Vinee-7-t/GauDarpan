@@ -64,27 +64,35 @@ interface DiseaseRecommendation {
 const diseaseRecommendations: { [key: string]: DiseaseRecommendation } = {
   'Healthy': {
     condition: 'Healthy',
-    recommendation: 'Your cow appears to be in good health. Continue regular monitoring and maintain current care practices.'
+    recommendation: 'Continue regular monitoring and maintain current care practices.'
   },
   'Pink Eye': {
     condition: 'Pink Eye',
-    recommendation: 'Isolate affected animal, protect from sunlight, and consult a vet for appropriate antibiotic treatment. Keep the area clean and consider fly control measures.'
+    recommendation: 'Isolate animal, protect from sunlight, and consult vet for antibiotics. Control flies and keep area clean.'
   },
   'Mastitis': {
     condition: 'Mastitis', 
-    recommendation: 'Frequent milking of affected quarter, maintain strict hygiene, use teat dips, and seek immediate veterinary care for appropriate antibiotic treatment. Monitor temperature and milk quality.'
+    recommendation: 'Frequent milking, maintain hygiene, use teat dips. Seek immediate vet care and monitor milk quality.'
+  },
+  'Abscess': {
+    condition: 'Abscess',
+    recommendation: 'Do not drain yourself. Apply warm compresses and contact vet immediately for treatment.'
   },
   'Foot Rot': {
     condition: 'Foot Rot',
-    recommendation: 'Keep affected area clean and dry, use medicated footbath treatment, improve flooring conditions, and consult vet for antibiotic therapy. Consider hoof trimming if needed.'
+    recommendation: 'Keep area clean and dry, use medicated footbath. Consult vet for antibiotics and consider trimming.'
+  },
+  'Digital Dermatitis': {
+    condition: 'Digital Dermatitis',
+    recommendation: 'Clean affected area, apply antibacterial treatment, and use regular footbaths. Improve housing hygiene.'
   },
   'Skin Disease': {
     condition: 'Skin Disease',
-    recommendation: 'Isolate affected animal, maintain hygiene, use prescribed medications, and monitor for spreading. Consider environmental factors and implement proper sanitation.'
+    recommendation: 'Isolate animal, maintain hygiene, use prescribed medications. Monitor and improve sanitation.'
   },
   'Mouth Ulcer': {
     condition: 'Mouth Ulcer',
-    recommendation: 'Provide soft feed, maintain oral hygiene, use prescribed medications, and monitor eating habits. Ensure proper nutrition and hydration during recovery.'
+    recommendation: 'Provide soft feed, maintain oral hygiene, and use prescribed medications. Monitor eating habits.'
   }
 };
 
@@ -237,10 +245,9 @@ function App() {
     try {
       let prompt = message;
       if (isInitial && detectedDisease && currentModelType) {
-        prompt = `You are a veterinary AI assistant. Keep responses under 3 bullet points. No asterisks or markdown formatting.
-A farmer has detected "${detectedDisease}" in their cow's ${currentModelType}. List only the most important immediate actions to take.`;
+        prompt = `You are a cattle health AI assistant. List 3 immediate actions for ${detectedDisease} in cow's ${currentModelType}. No markdown formatting, asterisks or bullet points. Number the points 1, 2, 3. Keep each point to one line.`;
       } else {
-        prompt = `You are a veterinary AI assistant for cow health. Keep your response under 3 short sentences. No asterisks or markdown. Answer: ${message}`;
+        prompt = `You are a cattle health AI assistant. Give a clear, short answer in 2-3 lines without any special formatting: ${message}`;
       }
 
       const aiResponse = await callGeminiWithBackoff(prompt);
@@ -278,14 +285,15 @@ A farmer has detected "${detectedDisease}" in their cow's ${currentModelType}. L
 
   // Navigate to chatbot with disease context
   const navigateToChatbot = (disease: string, modelType: ModelType) => {
+    console.log('Navigating to chatbot with:', disease, modelType);
     setDetectedDisease(disease);
     setCurrentModelType(modelType);
     setChatMessages([]);
     setCurrentView('chatbot');
     // Send initial message after a short delay to ensure state is updated
     setTimeout(() => {
-      sendMessageToAI(`Provide suggestions for treating ${disease} in a cow`, true);
-    }, 100);
+      sendMessageToAI(`What are the immediate actions needed for treating ${disease} in a cow's ${modelType}?`, true);
+    }, 500);
   };
 
   const CowLogo = () => (
