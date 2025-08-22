@@ -56,6 +56,38 @@ interface ChatMessage {
   timestamp: Date;
 }
 
+interface DiseaseRecommendation {
+  condition: string;
+  recommendation: string;
+}
+
+const diseaseRecommendations: { [key: string]: DiseaseRecommendation } = {
+  'Healthy': {
+    condition: 'Healthy',
+    recommendation: 'Your cow appears to be in good health. Continue regular monitoring and maintain current care practices.'
+  },
+  'Pink Eye': {
+    condition: 'Pink Eye',
+    recommendation: 'Isolate affected animal, protect from sunlight, and consult a vet for appropriate antibiotic treatment. Keep the area clean and consider fly control measures.'
+  },
+  'Mastitis': {
+    condition: 'Mastitis', 
+    recommendation: 'Frequent milking of affected quarter, maintain strict hygiene, use teat dips, and seek immediate veterinary care for appropriate antibiotic treatment. Monitor temperature and milk quality.'
+  },
+  'Foot Rot': {
+    condition: 'Foot Rot',
+    recommendation: 'Keep affected area clean and dry, use medicated footbath treatment, improve flooring conditions, and consult vet for antibiotic therapy. Consider hoof trimming if needed.'
+  },
+  'Skin Disease': {
+    condition: 'Skin Disease',
+    recommendation: 'Isolate affected animal, maintain hygiene, use prescribed medications, and monitor for spreading. Consider environmental factors and implement proper sanitation.'
+  },
+  'Mouth Ulcer': {
+    condition: 'Mouth Ulcer',
+    recommendation: 'Provide soft feed, maintain oral hygiene, use prescribed medications, and monitor eating habits. Ensure proper nutrition and hydration during recovery.'
+  }
+};
+
 const models = [
   { 
     id: 'eye' as ModelType, 
@@ -205,9 +237,10 @@ function App() {
     try {
       let prompt = message;
       if (isInitial && detectedDisease && currentModelType) {
-        prompt = `You are a veterinary AI assistant for cow health. A farmer has detected "${detectedDisease}" in their cow's ${currentModelType} through our AI analysis system. Please provide short crisp suggestions, treatment options, and preventive measures for this condition. Be practical and actionable in your advice.`;
+        prompt = `You are a veterinary AI assistant. Keep responses under 3 bullet points. No asterisks or markdown formatting.
+A farmer has detected "${detectedDisease}" in their cow's ${currentModelType}. List only the most important immediate actions to take.`;
       } else {
-        prompt = `You are a veterinary AI assistant specializing in cow health. Please provide helpful, accurate, and practical advice for the following question: ${message}`;
+        prompt = `You are a veterinary AI assistant for cow health. Keep your response under 3 short sentences. No asterisks or markdown. Answer: ${message}`;
       }
 
       const aiResponse = await callGeminiWithBackoff(prompt);
@@ -863,8 +896,10 @@ function App() {
                     <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
                       <h6 className="font-bold text-blue-800 mb-2">Recommendation</h6>
                       <p className="text-blue-700 text-sm">
-                        Based on the analysis, your cow appears to be in good health. 
-                        Continue regular monitoring and maintain current care practices.
+                        {predictionResult && diseaseRecommendations[predictionResult.class] ? 
+                          diseaseRecommendations[predictionResult.class].recommendation :
+                          'Please consult with a veterinarian for proper diagnosis and treatment recommendations.'
+                        }
                       </p>
                     </div>
 
